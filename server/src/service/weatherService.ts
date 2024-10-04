@@ -12,31 +12,28 @@ interface Coordinates {
 class Weather {
   city: string;
   date: string;
-  temperature: number;
+  icon: string;
+  iconDescription: string;
   tempF: number;
   windSpeed: number;
   humidity: number;
-  description: string;
-  icon: string;
 
   constructor(
     city: string,
     date: string,
-    temperature: number,
+    icon: string,
+    iconDescription: string,
     tempF: number,
     windSpeed: number,
     humidity: number,
-    description: string,
-    icon: string
   ) {
     this.city = city;
     this.date = date;
-    this.temperature = temperature;
+    this.icon = icon;
+    this.iconDescription = iconDescription;
     this.tempF = tempF;
     this.windSpeed = windSpeed;
     this.humidity = humidity;
-    this.description = description;
-    this.icon = icon;
   }
 }
 
@@ -92,30 +89,32 @@ class WeatherService {
   }
   // TODO: Build parseCurrentWeather method
   private parseCurrentWeather(response: any) { 
-    const city = response.city.name;
+    const city = this.cityName;
     const date = new Date(response.list[0].dt * 1000).toLocaleDateString();
-    const temperature = response.list[0].main.temp;
-    const tempF = ((temperature - 273.15) *9) /5 + 32;
+    const icon = response.list[0].weather[0].icon;
+    const iconDescription = response.list[0].weather[0].description;
+    const tempF = ((response.list[0].main.temp - 273.15) * 9) / 5 + 32;
     const windSpeed = response.list[0].wind.speed;
     const humidity = response.list[0].main.humidity;
-    const description = response.list[0].weather[0].description;
-    const icon = response.list[0].weather[0].icon;
 
-    return new Weather(city, date, temperature, tempF, windSpeed, humidity, description, icon);
+    return new Weather(city, date, icon, iconDescription, tempF, windSpeed, humidity);
   }
   // TODO: Complete buildForecastArray method
   private buildForecastArray(currentWeather: Weather, weatherData: any[]) { 
     const forecastArray = [];
+
+    forecastArray.push(currentWeather);
+
     for (let i = 1; i < weatherData.length; i++) {
+      const city = this.cityName;
       const date = new Date(weatherData[i].dt * 1000).toLocaleDateString();
-      const temperature = weatherData[i].main.temp;
-      const tempF = ((temperature - 273.15) * 9) / 5 + 32;
+      const icon = weatherData[i].weather[0].icon;
+      const iconDescription = weatherData[i].weather[0].description;
+      const tempF = ((weatherData[i].main.temp - 273.15) * 9) / 5 + 32; // Convert temperature to Fahrenheit
       const windSpeed = weatherData[i].wind.speed;
       const humidity = weatherData[i].main.humidity;
-      const description = weatherData[i].weather[0].description;
-      const icon = weatherData[i].weather[0].icon;
 
-      forecastArray.push(new Weather(currentWeather.city, date, temperature, tempF, windSpeed, humidity, description, icon));
+      forecastArray.push(new Weather(city, date, icon, iconDescription, tempF, windSpeed, humidity));
     }
     return forecastArray;
   }
